@@ -11,12 +11,23 @@ enum class JobType { Programmer = 1, Designer, Artist, Barista, Unemployed };
 
 class Human {
 private:
-    string name;
+    string 
+        name,
+        status = "Idle";
+
+    double
+        energy = 100,
+        hunger = 100,
+        thirst = 100,
+        money;
+    
+    int 
+        day = 1,
+        hour = 8,
+        age;
+        
     JobType job;
-    int age;
-    double money;
-    double hunger = 100;
-    double thirst = 100;
+
 
 public:
     Human(const string& name, JobType job, int age, double money)
@@ -36,22 +47,38 @@ public:
     }
 
     // Getter
-    string getName() const { return name; }
-    JobType getJob() const { return job; }
-    int getAge() const { return age; }
-    double getMoney() const { return money; }
-    double getHunger() const { return hunger; }
-    double getThirst() const { return thirst; }
+    string getName()    const { return name; }
+    string getStatus()  const { return status; }
+    JobType getJob()    const { return job; }
+    int getDay()        const { return day; }
+    int getHour()       const { return hour; }
+    int getAge()        const { return age; }
+    double getEnergy()  const { return energy; }
+    double getHunger()  const { return hunger; }
+    double getThirst()  const { return thirst; }
+    double getMoney()   const { return money; }
 
     // Setter
     void setName(const string& newName) { name = newName; }
+    void setStatus(const string& newStatus) {status = newStatus; }
+    void setDay(int newDay) { age = newDay; }
+    void setHour(int newHour) { age = newHour; }
     void setAge(int newAge) { age = newAge; }
     void setJob(JobType newJob) { job = newJob; }
-    void setMoney(double newMoney) { money = newMoney; }
+    void setEnergy(double newEnergy) { hunger = newEnergy; }
     void setHunger(double newHunger) { hunger = newHunger; }
     void setThirst(double newThirst) { thirst = newThirst; }
+    void setMoney(double newMoney) { money = newMoney; }
 
     // Logic
+    void sleep(){
+        while(energy < 100){
+            energy+=15;
+            if(energy > 100) energy = 100;
+            passHour(1);
+        }
+    }
+
     void eat() { hunger = 100; }
     void drink() { thirst = 100; }
     void pay(double amount) { money -= amount; }
@@ -60,7 +87,7 @@ public:
     bool canAfford(double amount) const { return money >= amount; }
 
     bool work() {
-        if (hunger < 50 || thirst < 50) return false;
+        if (energy < 50 || hunger < 50 || thirst < 50) return false;
 
         switch (job) {
             case JobType::Programmer: earn(1000); break;
@@ -70,6 +97,7 @@ public:
             default:                  earn(300);  break;
         }
 
+        energy -= 50;
         hunger -= 50;
         thirst -= 50;
         return true;
@@ -85,6 +113,18 @@ public:
             default:                  return "Unknown";
         }
     }
+
+    void passHour(int h) {
+        hour += h;
+        if(hour >= 24) {
+            hour %= 24;
+            day++;
+        }
+    }
+};
+
+class Programmer : public Human{
+
 };
 
 // Global variable and declaration
@@ -197,50 +237,51 @@ void deletePlayer() {
 // Player Menu
 void playerMenu(Human* p) {
     int choice = 0;
-    string state = "Idle";
 
-    while (choice != 5) {
+    while (choice != 6) {
         std::system("cls");
-        std::cout << " | Name: " << p->getName()
-                  << "\n | Age: " << p->getAge()
-                  << "\n | Job: " << p->getJobString()
-                  << "\n | Money: $" << p->getMoney()
-                  << "\n | State: " << state
-                  << "\n | Hunger: " << p->getHunger()
-                  << "\n | Thirst: " << p->getThirst() << "\n"
+        std::cout << " | Name: " << p->getName() << " | Age: " << p->getAge()
+                  << "\n | Job: " << p->getJobString() << " | Money: $" << p->getMoney()
+                  << "\n | Energy: " << p->getEnergy() << " | Hunger: " << p->getHunger()<< " | Thirst: " << p->getThirst()
+                  << "\n | Status: " << p->getStatus()
+                  << "\n | Day: " << p->getDay() << " | Hour: " << p->getHour() << '\n'
                   << "----------------------------------------\n"
-                  << "1. Work (-50 Hunger & Thirst)\n"
+                  << "1. Work (-50 Energy, Hunger & Thirst)\n"
                   << "2. Eat  ($130, +100 Hunger)\n"
                   << "3. Drink ($70, +100 Thirst)\n"
                   << "4. Night Club ($500, +100 Hunger & Thirst)\n"
-                  << "5. Exit\n"
+                  << "5. Sleep (restore energy 15/hour)\n"
+                  << "6. Exit\n"
                   << "> Option: "; std::cin >> choice;
 
         switch (choice) {
             case 1:
-                if (!p->work()) state = "Too tired to work.";
-                else state = "Worked successfully.";
+                if (!p->work()) p->setStatus("Too tired to work.");
+                else p->setStatus("Worked succesfully");
                 break;
             case 2:
-                if (!p->canAfford(130)) state = "Not enough money for food.";
+                if (!p->canAfford(130)) p->setStatus("Not enough money for food.");
                 else {
-                    p->pay(130); p->eat(); state = "Ate food.";
+                    p->pay(130); p->eat(); p->setStatus("Ate food.");
                 }
                 break;
             case 3:
-                if (!p->canAfford(70)) state = "Not enough money for drink.";
+                if (!p->canAfford(70)) p->setStatus("Not enough money for drink.");
                 else {
-                    p->pay(70); p->drink(); state = "Drank water.";
+                    p->pay(70); p->drink(); p->setStatus("Drank water.");
                 }
                 break;
             case 4:
-                if (!p->canAfford(500)) state = "Can't afford the club.";
+                if (!p->canAfford(500)) p->setStatus("Can't afford the club.");
                 else {
-                    p->pay(500); p->eat(); p->drink(); state = "Had fun at the club.";
+                    p->pay(500); p->eat(); p->drink(); p->setStatus("Had fun at the club.");
                 }
                 break;
+            case 5:
+                p->sleep(); p->setStatus("Waking up from the sleep.");
+                break;
             default:
-                state = "Idle";
+                p->setStatus("Idle");
                 break;
         }
     }

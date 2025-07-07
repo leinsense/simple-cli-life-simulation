@@ -1,11 +1,12 @@
 # Simple CLI Life Simulation Game (C++)
 
 A simple terminal-based life simulation game built in C++ to explore OOP concepts and modern memory management.
+### Version: 0.2.0
 
 ## 🔑 Key Features
 - Create, select, and delete players
 - Job-based work system with earnings
-- Eat, drink, and go clubbing to restore stats
+- Sleep, Eat, drink, and go clubbing to restore stats
 - Input validation for age, money, and job
 - Uses `enum class` and `std::unique_ptr`
 
